@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ORS+ Work Experience</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+
+<body class="bg-gray-900 text-gray-200 p-6">
+
+    <!--Adding main LOGO [Centered]-->
+    
+    <div class="text-center mb-5 px-4 pt-4">
+        <h1 class="text-5xl font-bold text-white mb-4">ORS+</h1>
+        <!--<p class="text-xl text-gray-400">Online Recruiting Made Fast and Easy</p>-->
+    </div>
+    
+
+    <!--Adding main Experience BOX-->
+    <div class= "max-w-3xl mx-auto bg-gray-800 p-6 rounded-lg shadow-lg">
+        <h2 class="text-3xl font-bold mb-4 text-white">Applicant Work Experience</h2>
+
+        <!--Add Experience Page-->
+        <div id="addExperiencePage">
+            <form id="workExperienceForm" class="space-y-4">
+
+                <!--job Title [jobTitle]-->
+                <div class="mb-4">
+                    <label for="jobTitle" class="block text-gray-400 mb-2">Job Title</label>
+                    <input class="w-full p-3 rounded bg-gray-700 text-gray-300 placeholder-gray-500" type="text" id="jobTitle" placeholder="Please Enter Your Past Job Title">
+                </div>
+
+                 <!--company name [employerName]-->
+                 <div class="mb-4">
+                    <label class="block text-gray-400 mb-2" for="employerName">Employer/Company Name</label>
+                    <input class="w-full p-3 rounded bg-gray-700 text-gray-300 placeholder-gray-500" type="text" id="employerName" placeholder="Please Enter Your Previous Employers Name">
+                </div>
+                
+                 <!--start date [workStart]-->
+                 <div class="mb-4">
+                    <label class="block text-gray-400 mb-2" for="workStart">Start Date</label>
+                    <input class="w-full p-3 rounded bg-gray-700 text-gray-300 placeholder-gray-500" type="date" id="workStart">
+                </div>
+
+                
+                <!--end date [workEnd]-->
+                <div class="mb-4">
+                    <label class="block text-gray-400 mb-2" for="workEnd">Start Date</label>
+                    <input class="w-full p-3 rounded bg-gray-700 text-gray-300 placeholder-gray-500" type="date" id="workEnd">
+                </div>
+                
+                <!--button: [addExp] [viewExpPgBtn]-->
+                <div class="flex gap-4">
+                    <button class="flex-1 p-3 rounded text-white font-bold bg-blue-500 hover:bg-blue-600" type="button" id="addExp" >Add More Experience</button>
+                    <button class="flex-1 p-3 rounded text-white font-bold bg-blue-500 hover:bg-blue-600" type="button" id="viewExpPgBtn">View Added Experience</button>
+                </div>
+
+            </form>
+        </div>
+
+
+        <!--SEPERATE PAGE FOR VIEWING EXP; HIDDEN BY DEFAULT-->
+        <div id="viewExpPg" class="hidden">
+            <h3 class="text-xl font-semibold text-white">Added Work Experience</h3>
+            <ul id="pendingWorkExpList" class="mt-4 space-y-4"></ul> <!--unordered list named pendingWorkExpList-->
+
+            <!--button-->
+            <div class="flex gap-4 mt-6">
+                <button class="flex-1 p-3 rounded bg-gray-600 text-white font-bold hover:bg-gray-500 transition" type="button" id="goBackBtn" > Back </button>
+                <button class="flex-1 p-3 rounded bg-green-600 text-white font-bold hover:bg-green-500 transition"type="button" id="submitAllBtn" > Submit All </button>
+            </div>
+
+        </div>
+
+    </div>
+
+    
+    
+    <script>
+        let pendingExp=[]; //empty array
+        let editingIndex=-1; //to track which exp the user wants to edit
+
+        //update list of work experiences on a webpage.
+        function renderExperienceList(){
+            
+            const pendingList=document.getElementById("pendingWorkExpList");  //find and link the predefined list
+            pendingList.innerHTML=""; //empty list before repopulating to avoid duplicates
+            
+            pendingExp.forEach((exp, index)=>{ //iterate through each item in the list
+                const item=document.createElement("li"); //new list item
+                item.classList.add("p-4", "border", "border-gray-600", "rounded-lg", "shadow-md", "bg-gray-700", "flex", "justify-between", "items-center"); //style to the item
+                item.innerHTML= //rendoring and adding text to the work exp item
+                    `<div>
+                        <p class="text-lg font-bold text-white">${exp.jobTitle} at ${exp.employerName}</p>
+                        <p class="text-sm text-gray-400"> from: ${exp.workStart} - ${exp.workEnd || "Present"}</p>
+                    </div>
+
+                    <div class="flex gap-2">
+                        <button onclick="editExperience(${index})" class="px-3 py-1 bg-yellow-500 text-white rounded hover:bg-yellow-400 transition">Edit</button>
+                        <button onclick="deleteExperience(${index})" class="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-500 transition">Delete</button>
+                    </div>`;
+                pendingList.appendChild(item); //add the item to the list
+            });
+        }
+
+        document.getElementById("addExp").addEventListener("click", function(){ //defining an even for addExpBtn
+            //grabbing all inputs from user 
+            const jobTitle=document.getElementById("jobTitle").value;
+            const employerName=document.getElementById("employerName").value;
+            const workStart=document.getElementById("workStart").value;
+            const workEnd=document.getElementById("workEnd").value;
+            //if any of the items are not filled
+            if (!jobTitle || !employerName || !workStart || !workEnd) { //replace this code to show error below the field name 
+                alert("Please fill in all the required fields.");
+                return;}
+            if (editingIndex !== -1) {
+                pendingExp[editingIndex]={jobTitle, employerName, workStart, workEnd};
+                editingIndex = -1;
+                document.getElementById("finalizeEdit").classList.add("hidden");
+                document.getElementById("addExp").classList.remove("hidden");
+                document.getElementById("viewExpPg").classList.remove("hidden");
+                document.getElementById("addExperiencePage").classList.add("hidden");
+                renderExperienceList();
+                return;
+            } 
+            pendingExp.push({ jobTitle, employerName, workStart, workEnd });
+            document.getElementById("workExperienceForm").reset();});
+
+            document.getElementById("viewExpPgBtn").addEventListener("click", function(){ //defining an even for addExpBtn
+                //grabbing all inputs from user 
+                const jobTitle=document.getElementById("jobTitle").value;
+                const employerName=document.getElementById("employerName").value;
+                const workStart=document.getElementById("workStart").value;
+                const workEnd=document.getElementById("workEnd").value;
+                //if any of the items are not filled
+                if (!jobTitle || !employerName || !workStart || !workEnd) { //replace this code to show error below the field name 
+                    alert("Please fill in all the required fields.");
+                    return;}
+                if (editingIndex !== -1) {
+                    pendingExp[editingIndex]={jobTitle, employerName, workStart, workEnd};
+                    editingIndex = -1;
+                    document.getElementById("finalizeEdit").classList.add("hidden");
+                    document.getElementById("addExp").classList.remove("hidden");
+                    document.getElementById("viewExpPg").classList.remove("hidden");
+                    document.getElementById("addExperiencePage").classList.add("hidden");
+                    renderExperienceList();
+                    return;
+                } 
+                pendingExp.push({ jobTitle, employerName, workStart, workEnd });
+                document.getElementById("workExperienceForm").reset();});
+
+        document.getElementById("viewExpPgBtn").addEventListener("click", function(){
+            renderExperienceList();
+            document.getElementById("addExperiencePage").classList.add("hidden");
+            document.getElementById("viewExpPg").classList.remove("hidden");});
+
+        document.getElementById("goBackBtn").addEventListener("click", function(){
+            document.getElementById("viewExpPg").classList.add("hidden");
+            document.getElementById("addExperiencePage").classList.remove("hidden");});
+
+        document.getElementById("submitAllBtn").addEventListener("click", function(){
+            if(pendingExp.length===0) {
+                alert("No experiences to submit.");
+                return;}
+            alert("All experiences have been submitted successfully"); //placeholder message for now [replace it]
+            pendingExp = [];
+            renderExperienceList();});
+
+        function editExperience(index) {
+            const experience=pendingExp[index];
+
+            document.getElementById("jobTitle").value=experience.jobTitle;
+            document.getElementById("employerName").value=experience.employerName;
+            document.getElementById("workStart").value=experience.workStart;
+            document.getElementById("workEnd").value=experience.workEnd;
+
+            editingIndex = index;
+            document.getElementById("addExp").classList.add("hidden");
+            document.getElementById("viewExpPg").classList.add("hidden");
+            document.getElementById("addExperiencePage").classList.remove("hidden");}
+
+        function deleteExperience(index) {
+            if (confirm("Are you sure you want to delete this experience")) {// replace this code too
+                pendingExp.splice(index, 1);
+                renderExperienceList();}}
+    </script>
+
+</body>
+</html>
